@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title></title>
+  </head>
+  <body>
+    <h1>Gcode analyzer</h1>
+    <input type="file" id="upload"> 
+    <h3 id="disp">Max R: </h3>
+
+    <script>
+      var btn = document.querySelector("#upload");
+      btn.addEventListener("change", handleFiles, false);
+
+      function handleFiles() {
+        var f = this.files[0]; /* now you can work with the file list */
+
+        var maxR;
+        var r = new FileReader();
+        r.onload = function(e) { 
+          var contents = e.target.result;
+          maxR = parseGCode(contents);
+          var disp = document.querySelector("#disp");
+          disp.innerHTML = "Max R: " + maxR;
+        }
+        r.readAsText(f);
+      }
+
+      function parseGCode(strings){
+        var lines = strings.split('\n'); 
+        var tmpArray = [];
+        for(var line of lines){
+          if(line.match(/G1.*/)){
+            if(line.match(/X/) && line.match(/Y/)){
+              var _x = line.match(/X-?[\d\.]*?[\s\n]/)[0];
+              var _y = line.match(/Y-?[\d\.]*?[\s\n]/)[0];
+              var x = parseFloat(_x.slice(1,_x.length));
+              var y = parseFloat(_y.slice(1,_y.length));
+              var r = Math.sqrt(x*x+y*y);
+              tmpArray.push(r);
+            }
+          }
+        }
+        return Math.max(...tmpArray);
+      }
+
+    </script>
+  </body>
+</html>
